@@ -1,0 +1,16 @@
+# Perfil de desenvolvimento local.
+spring:
+  config:
+    # Lê o arquivo .env da raiz do projeto como se fosse um .properties.
+    # Variáveis de ambiente reais do sistema têm prioridade sobre ele.
+    import: optional:file:.env[.properties]
+
+  thymeleaf:
+    # Recarrega templates sem reiniciar a aplicação.
+    cache: false
+
+logging:
+  level:
+    # Mostra o SQL gerado pelo Hibernate e as ações do Flyway.
+    org.hibernate.SQL: debug
+    org.flywaydb: info

@@ -1,0 +1,21 @@
+# Normaliza quebras de linha no repositório (LF), independentemente do sistema operacional.
+* text=auto eol=lf
+
+# Scripts Windows precisam de CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Script Unix do Maven Wrapper precisa de LF para funcionar em Linux/macOS/Docker
+/mvnw text eol=lf
+*.sh  text eol=lf
+
+# Arquivos binários
+*.jar  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff binary
+*.woff2 binary
