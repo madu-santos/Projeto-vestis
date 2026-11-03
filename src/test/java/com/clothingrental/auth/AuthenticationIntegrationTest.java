@@ -288,6 +288,35 @@ class AuthenticationIntegrationTest {
                 .andExpect(content().string(containsString("Acesso administrativo realizado")));
     }
 
+    @Test
+    void activeSessionIsDeniedImmediatelyWhenStoreIsDisabledDuringTheSession() throws Exception {
+        // 1. Funcionária de uma loja ativa realiza login com sucesso
+        MockHttpSession session = logIn();
+
+        // 2. Sistema permite o acesso ao painel administrativo /admin
+        mockMvc.perform(get("/admin").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/home"));
+
+        // 3. A loja é desativada diretamente no banco durante a mesma sessão
+        sampleStore.disable();
+        storeRepository.save(sampleStore);
+        storeRepository.flush();
+
+        // 4. A funcionária tenta acessar novamente /admin utilizando a mesma sessão anterior
+        // 5. O sistema nega o acesso (HTTP 403 Forbidden) em tempo real
+        mockMvc.perform(get("/admin").session(session))
+                .andExpect(status().isForbidden());
+
+        // 6. Ao reativar a loja, o acesso da funcionária volta a ser permitido
+        sampleStore.enable();
+        storeRepository.save(sampleStore);
+        storeRepository.flush();
+
+        mockMvc.perform(get("/admin").session(session))
+                .andExpect(status().isOk());
+    }
+
     // --- Logout ---
 
     @Test

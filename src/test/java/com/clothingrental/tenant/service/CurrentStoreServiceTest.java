@@ -2,14 +2,20 @@ package com.clothingrental.tenant.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 import com.clothingrental.auth.model.StaffAccountPrincipal;
 import com.clothingrental.tenant.exception.NoCurrentStoreContextException;
 import com.clothingrental.tenant.exception.StoreDisabledException;
+import com.clothingrental.tenant.repository.StoreRepository;
 import java.util.Collections;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,13 +23,17 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+@ExtendWith(MockitoExtension.class)
 class CurrentStoreServiceTest {
 
+    @Mock
+    private StoreRepository storeRepository;
+
+    @InjectMocks
     private CurrentStoreService currentStoreService;
 
     @BeforeEach
     void setUp() {
-        currentStoreService = new CurrentStoreService();
         SecurityContextHolder.clearContext();
     }
 
@@ -33,7 +43,7 @@ class CurrentStoreServiceTest {
     }
 
     @Test
-    void returnsStoreIdWhenStaffAccountPrincipalIsAuthenticated() {
+    void returnsStoreIdWhenStaffAccountPrincipalIsAuthenticatedAndStoreIsActiveInDatabase() {
         StaffAccountPrincipal principal = new StaffAccountPrincipal(
                 10L,
                 "maria.silva",
@@ -51,6 +61,8 @@ class CurrentStoreServiceTest {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
+
+        when(storeRepository.existsByIdAndEnabledTrue(5L)).thenReturn(true);
 
         Long storeId = currentStoreService.getCurrentStoreId();
 
@@ -111,14 +123,13 @@ class CurrentStoreServiceTest {
     }
 
     @Test
-    void throwsExceptionWhenStoreIsDisabled() {
+    void throwsExceptionWhenStoreIsDisabledInDatabaseEvenIfPrincipalWasActive() {
         StaffAccountPrincipal principal = new StaffAccountPrincipal(
                 10L,
                 "maria.silva",
                 "encoded-hash",
                 5L,
-                true,
-                false // storeEnabled = false
+                true
         );
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
@@ -131,8 +142,10 @@ class CurrentStoreServiceTest {
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
 
+        when(storeRepository.existsByIdAndEnabledTrue(5L)).thenReturn(false);
+
         assertThatThrownBy(() -> currentStoreService.getCurrentStoreId())
                 .isInstanceOf(StoreDisabledException.class)
-                .hasMessageContaining("desativada");
+                .hasMessageContaining("desativada no sistema");
     }
 }
