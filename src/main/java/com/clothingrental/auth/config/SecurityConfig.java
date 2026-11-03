@@ -9,21 +9,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Regras de acesso da aplicação.
+ * Regras de acesso e segurança da plataforma Vestis.
  *
  * <p>A ordem das regras importa: o Spring Security usa a primeira que combinar com a URL.
- * CSRF e as proteções de sessão (como a troca do ID de sessão após o login)
- * permanecem com os padrões seguros do framework.
+ * Rotas públicas de vitrine e recursos estáticos aceitam apenas HTTP GET.
+ * O envio público de solicitações de clientes aceita HTTP POST protegido por CSRF.
+ * O painel administrativo (/admin/**) requer autenticação com papel ROLE_ADMIN.
  */
 @Configuration
 public class SecurityConfig {
 
-    private static final String[] PUBLIC_PATHS = {
+    private static final String[] PUBLIC_GET_PATHS = {
         "/",
         "/login",
-        "/catalog/**",
-        "/garments/**",
-        "/rental-requests/**",
+        "/lojas/**",
         "/css/**",
         "/js/**",
         "/images/**",
@@ -35,15 +34,21 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.GET, PUBLIC_PATHS).permitAll()
+                // Leitura pública: site institucional, vitrines e assets estáticos
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET_PATHS).permitAll()
+                // Envio público de solicitação de aluguel por clientes na vitrine (protegido por CSRF)
+                .requestMatchers(HttpMethod.POST, "/lojas/*/solicitacoes").permitAll()
+                // Qualquer outro método em /lojas/** (PUT, PATCH, DELETE, POSTs não previstos) é explicitamente negado,
+                // inclusive para administradores autenticados
+                .requestMatchers("/lojas/**").denyAll()
+                // Área administrativa restrita aos funcionários das lojas
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                // Qualquer outro caminho exige autenticação
                 .anyRequest().authenticated())
             .formLogin(form -> form
                 .loginPage("/login")
-                // Vai para /admin, ou para a página protegida que o usuário tentou abrir antes do login.
                 .defaultSuccessUrl("/admin"))
             .logout(logout -> logout
-                // Com CSRF habilitado, o logout só é aceito via POST em /logout.
                 .logoutSuccessUrl("/login?logout")
                 .deleteCookies("JSESSIONID"));
         return http.build();

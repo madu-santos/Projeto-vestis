@@ -1,9 +1,9 @@
 package com.clothingrental.auth.service;
 
 import com.clothingrental.auth.model.StaffAccount;
+import com.clothingrental.auth.model.StaffAccountPrincipal;
 import com.clothingrental.auth.repository.StaffAccountRepository;
 import java.util.Locale;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class StaffAccountDetailsService implements UserDetailsService {
-
-    static final String ADMIN_ROLE = "ADMIN";
 
     private final StaffAccountRepository staffAccountRepository;
 
@@ -38,11 +36,15 @@ public class StaffAccountDetailsService implements UserDetailsService {
     }
 
     private UserDetails toUserDetails(StaffAccount account) {
-        return User.withUsername(account.getUsername())
-                .password(account.getPasswordHash())
-                .disabled(!account.isEnabled())
-                // roles("ADMIN") gera a autoridade "ROLE_ADMIN".
-                .roles(ADMIN_ROLE)
-                .build();
+        Long storeId = account.getStore() != null ? account.getStore().getId() : null;
+        boolean storeEnabled = account.getStore() != null && account.getStore().isEnabled();
+        return new StaffAccountPrincipal(
+                account.getId(),
+                account.getUsername(),
+                account.getPasswordHash(),
+                storeId,
+                account.isEnabled(),
+                storeEnabled
+        );
     }
 }

@@ -7,11 +7,13 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -19,6 +21,8 @@ import com.clothingrental.auth.config.DevAdminAccountInitializer;
 import com.clothingrental.auth.model.StaffAccount;
 import com.clothingrental.auth.repository.StaffAccountRepository;
 import com.clothingrental.auth.service.StaffAccountService;
+import com.clothingrental.tenant.model.Store;
+import com.clothingrental.tenant.repository.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,10 +39,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Testes de integração da autenticação: sobem a aplicação completa (filtros do
- * Spring Security, controllers, templates e PostgreSQL) e simulam requisições HTTP.
+ * Testes de integração da autenticação e segurança multi-tenant: sobem a aplicação completa
+ * (filtros do Spring Security, controllers, templates e PostgreSQL) e simulam requisições HTTP.
  *
- * <p>{@code @Transactional} desfaz as contas criadas em cada teste, preservando o banco.
+ * <p>{@code @Transactional} desfaz os registros criados em cada teste, preservando o banco.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,12 +50,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class AuthenticationIntegrationTest {
 
+    private static final String STORE_SLUG = "loja-teste";
     private static final String ACTIVE_USERNAME = "test.admin";
     private static final String DISABLED_USERNAME = "test.disabled";
     private static final String PASSWORD = "test-only-password-123";
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private StoreRepository storeRepository;
 
     @Autowired
     private StaffAccountService staffAccountService;
@@ -68,10 +76,13 @@ class AuthenticationIntegrationTest {
     @Autowired
     private ApplicationContext applicationContext;
 
+    private Store sampleStore;
+
     @BeforeEach
-    void createAccounts() {
-        staffAccountService.createAccount(ACTIVE_USERNAME, PASSWORD);
-        StaffAccount disabledAccount = staffAccountService.createAccount(DISABLED_USERNAME, PASSWORD);
+    void setUpTestData() {
+        sampleStore = storeRepository.save(new Store("Loja de Teste", STORE_SLUG));
+        staffAccountService.createAccount(ACTIVE_USERNAME, PASSWORD, sampleStore);
+        StaffAccount disabledAccount = staffAccountService.createAccount(DISABLED_USERNAME, PASSWORD, sampleStore);
         disabledAccount.disable();
         staffAccountRepository.flush();
     }
@@ -102,18 +113,73 @@ class AuthenticationIntegrationTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    @Test
-    void pathsNotExplicitlyPublicRequireAuthentication() throws Exception {
-        mockMvc.perform(get("/some-private-page"))
+    @ParameterizedTest
+    @ValueSource(strings = {"/some-private-page", "/catalog/any", "/garments/1", "/rental-requests/new"})
+    void pathsNotExplicitlyPublicRequireAuthentication(String path) throws Exception {
+        mockMvc.perform(get(path))
+                .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/", "/catalog/any", "/garments/1", "/rental-requests/new", "/css/app.css"})
+    @ValueSource(strings = {
+            "/",
+            "/lojas/loja-teste",
+            "/lojas/aurora",
+            "/lojas/festa-e-cia/vestidos",
+            "/css/app.css",
+            "/js/app.js",
+            "/images/logo.png"
+    })
     void publicPathsDoNotRequireLogin(String path) throws Exception {
-        // Ainda não existem páginas nessas rotas: 404 prova que a segurança deixou passar.
+        // Rotas públicas liberadas pelo Spring Security: 404 comprova que a segurança permitiu o acesso direto
         mockMvc.perform(get(path))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void publicStorePostSolicitacoesWithCsrfAllowedWithoutLogin() throws Exception {
+        // Rota POST /lojas/*/solicitacoes liberada publicamente para clientes solicitarem interesse
+        // Status 404 confirma que passou pelas regras de autorização do Spring Security
+        mockMvc.perform(post("/lojas/loja-teste/solicitacoes").with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void publicStorePostSolicitacoesWithoutCsrfIsRejected() throws Exception {
+        mockMvc.perform(post("/lojas/loja-teste/solicitacoes"))
+                .andExpect(status().isForbidden());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/lojas/aurora", "/lojas/aurora/config", "/lojas/qualquer-loja"})
+    void storeNonGetRoutesAreExplicitlyDeniedEvenForAuthenticatedAdmin(String path) throws Exception {
+        // Administrador autenticado tentando executar métodos não permitidos em rotas públicas de vitrine
+        mockMvc.perform(put(path).with(user(ACTIVE_USERNAME).roles("ADMIN")).with(csrf()))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(patch(path).with(user(ACTIVE_USERNAME).roles("ADMIN")).with(csrf()))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete(path).with(user(ACTIVE_USERNAME).roles("ADMIN")).with(csrf()))
+                .andExpect(status().isForbidden());
+
+        // Qualquer outro POST em /lojas/** que não seja /lojas/*/solicitacoes deve ser negado
+        mockMvc.perform(post(path).with(user(ACTIVE_USERNAME).roles("ADMIN")).with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/lojas/aurora", "/lojas/aurora/config"})
+    void storeNonGetRoutesRejectAnonymousVisitors(String path) throws Exception {
+        mockMvc.perform(put(path).with(csrf()))
+                .andExpect(redirectedUrl("/login"));
+
+        mockMvc.perform(patch(path).with(csrf()))
+                .andExpect(redirectedUrl("/login"));
+
+        mockMvc.perform(delete(path).with(csrf()))
+                .andExpect(redirectedUrl("/login"));
     }
 
     @ParameterizedTest
@@ -161,6 +227,46 @@ class AuthenticationIntegrationTest {
 
     @Test
     void disabledAccountCannotLogIn() throws Exception {
+        mockMvc.perform(formLogin().user(DISABLED_USERNAME).password(PASSWORD))
+                .andExpect(redirectedUrl("/login?error"))
+                .andExpect(unauthenticated());
+    }
+
+    @Test
+    void staffFromDisabledStoreCannotLogIn() throws Exception {
+        sampleStore.disable();
+        storeRepository.save(sampleStore);
+        storeRepository.flush();
+
+        mockMvc.perform(formLogin().user(ACTIVE_USERNAME).password(PASSWORD))
+                .andExpect(redirectedUrl("/login?error"))
+                .andExpect(unauthenticated());
+    }
+
+    @Test
+    void reactivatingStoreAllowsActiveStaffToLoginWhileDisabledStaffRemainsBlocked() throws Exception {
+        sampleStore.disable();
+        storeRepository.save(sampleStore);
+        storeRepository.flush();
+
+        // 1. Loja desativada: nem ativo nem inativo conseguem logar
+        mockMvc.perform(formLogin().user(ACTIVE_USERNAME).password(PASSWORD))
+                .andExpect(redirectedUrl("/login?error"))
+                .andExpect(unauthenticated());
+
+        mockMvc.perform(formLogin().user(DISABLED_USERNAME).password(PASSWORD))
+                .andExpect(redirectedUrl("/login?error"))
+                .andExpect(unauthenticated());
+
+        // 2. Loja reativada: funcionário ativo consegue logar, mas o desativado permanece bloqueado
+        sampleStore.enable();
+        storeRepository.save(sampleStore);
+        storeRepository.flush();
+
+        mockMvc.perform(formLogin().user(ACTIVE_USERNAME).password(PASSWORD))
+                .andExpect(redirectedUrl("/admin"))
+                .andExpect(authenticated().withUsername(ACTIVE_USERNAME).withRoles("ADMIN"));
+
         mockMvc.perform(formLogin().user(DISABLED_USERNAME).password(PASSWORD))
                 .andExpect(redirectedUrl("/login?error"))
                 .andExpect(unauthenticated());

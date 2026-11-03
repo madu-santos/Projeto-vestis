@@ -2,17 +2,20 @@ package com.clothingrental.auth.service;
 
 import com.clothingrental.auth.model.StaffAccount;
 import com.clothingrental.auth.repository.StaffAccountRepository;
+import com.clothingrental.tenant.model.Store;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Operações sobre contas administrativas.
+ * Operações sobre contas administrativas vinculadas a um estabelecimento (tenant).
  *
- * <p>Concentra as regras de criação de conta (validação e codificação da senha),
- * para que nenhuma outra classe precise lidar com a senha em texto puro.
+ * <p>Concentra as regras de criação de conta (validação, unicidade global do username,
+ * vinculação à loja e codificação da senha), para que nenhuma outra classe precise
+ * lidar com a senha em texto puro.
  */
 @Service
 public class StaffAccountService {
@@ -35,16 +38,32 @@ public class StaffAccountService {
         return staffAccountRepository.count() > 0;
     }
 
+    @Transactional(readOnly = true)
+    public Optional<StaffAccount> findByUsername(String username) {
+        if (username == null || username.isBlank()) {
+            return Optional.empty();
+        }
+        return staffAccountRepository.findByUsername(username.trim().toLowerCase(Locale.ROOT));
+    }
+
     /**
-     * Cria uma conta ativa, armazenando apenas o hash BCrypt da senha.
+     * Cria uma conta ativa vinculada a uma loja, armazenando apenas o hash BCrypt da senha.
      *
-     * @throws IllegalArgumentException se o usuário ou a senha não atenderem às regras
+     * @throws IllegalArgumentException se o usuário, a senha ou a loja não atenderem às regras
      */
     @Transactional
-    public StaffAccount createAccount(String username, String rawPassword) {
+    public StaffAccount createAccount(String username, String rawPassword, Store store) {
+        if (store == null) {
+            throw new IllegalArgumentException("A conta administrativa deve pertencer obrigatoriamente a um estabelecimento.");
+        }
         String normalizedUsername = validateUsername(username);
         validatePassword(rawPassword);
-        StaffAccount account = new StaffAccount(normalizedUsername, passwordEncoder.encode(rawPassword));
+
+        if (staffAccountRepository.findByUsername(normalizedUsername).isPresent()) {
+            throw new IllegalArgumentException("O nome de usuário '" + normalizedUsername + "' já está em uso na plataforma.");
+        }
+
+        StaffAccount account = new StaffAccount(normalizedUsername, passwordEncoder.encode(rawPassword), store);
         return staffAccountRepository.save(account);
     }
 
