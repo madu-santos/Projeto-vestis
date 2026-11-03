@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Testes de fundação: garantem que a aplicação sobe e consegue falar com o banco.
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * <p>Requer o PostgreSQL em execução ({@code docker compose up -d}) e o arquivo {@code .env}.
  */
 @SpringBootTest
+@ActiveProfiles("test")
 class ClothingRentalApplicationTests {
 
     @Autowired

@@ -1,0 +1,8 @@
+# Perfil usado pelos testes automatizados (@ActiveProfiles("test")).
+#
+# - Usa o mesmo PostgreSQL local do desenvolvimento, com as credenciais do .env.
+# - Os testes que gravam dados são @Transactional: tudo é desfeito (rollback) ao final.
+# - O inicializador do primeiro administrador NÃO roda aqui (ele é exclusivo do perfil dev).
+spring:
+  config:
+    import: optional:file:.env[.properties]

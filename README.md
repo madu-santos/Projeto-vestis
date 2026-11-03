@@ -44,15 +44,26 @@ O arquivo `.env` é lido pelo Docker Compose e pela aplicação (perfil `dev`). 
 | `DB_USERNAME` | Usuário do banco | — (obrigatória) |
 | `DB_PASSWORD` | Senha do banco | — (obrigatória) |
 | `SERVER_PORT` | Porta HTTP da aplicação | `8080` |
+| `ADMIN_USERNAME` | Usuário do 1º administrador (dev) | — (obrigatória na 1ª subida se sem conta) |
+| `ADMIN_PASSWORD` | Senha do 1º admin (mínimo 12 chars) | — (obrigatória na 1ª subida se sem conta) |
 
-### 2. Subir o banco de dados
+### 2. Primeiro Administrador (Perfil dev)
+
+Na primeira inicialização em desenvolvimento, caso nenhuma conta administrativa exista no banco de dados, o inicializador `DevAdminAccountInitializer` cria automaticamente o primeiro administrador com os valores de `ADMIN_USERNAME` e `ADMIN_PASSWORD` definidos no seu arquivo `.env`:
+
+- A senha precisa conter **no mínimo 12 caracteres**.
+- O hash é gerado com **BCrypt** e persistido na tabela `staff_accounts`.
+- Se a conta já existir no banco, as variáveis são ignoradas (não haverá sobrescrita).
+- Se não houver conta e as variáveis estiverem vazias, a aplicação falha na inicialização informando a necessidade de configurá-las.
+
+### 3. Subir o banco de dados
 
 ```powershell
 docker compose up -d
 docker compose ps        # aguarde o status "healthy"
 ```
 
-### 3. Rodar a aplicação
+### 4. Rodar a aplicação
 
 **Pelo IntelliJ:** execute a classe `ClothingRentalApplication` (SDK do projeto: Java 21).
 
@@ -66,18 +77,20 @@ $env:JAVA_HOME = "$env:USERPROFILE\.jdks\temurin-21.0.13"   # ajuste para o seu 
 
 A aplicação sobe em <http://localhost:8080>.
 
-> Nesta fase, o Spring Security protege todas as rotas com um usuário temporário gerado
-> automaticamente (a senha aparece no log). O login real será criado no módulo `auth`.
+- **Área pública** liberada: `/`, `/login`, `/catalog/**`, `/garments/**`, `/rental-requests/**`, `/css/**`, `/js/**`, `/images/**`.
+- **Área administrativa**: `/admin/**` (exige autenticação com role `ADMIN`).
+- Formulário de login: `/login` (redireciona para `/admin` após login bem-sucedido).
+- Logout: via formulário `POST /logout` (com token CSRF).
 
-### 4. Rodar os testes
+### 5. Rodar os testes
 
-Os testes de fundação precisam do PostgreSQL em execução (passo 2):
+Os testes de fundação precisam do PostgreSQL em execução (passo 3):
 
 ```powershell
 .\mvnw.cmd test
 ```
 
-### Parar o banco
+### 6. Parar o banco
 
 ```powershell
 docker compose down        # para o container (os dados são mantidos no volume)

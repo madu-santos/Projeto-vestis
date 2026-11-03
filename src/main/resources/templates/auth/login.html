@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Entrar - Painel administrativo</title>
+</head>
+<body>
+<main>
+    <h1>Acesso administrativo</h1>
+
+    <!-- Mensagem genérica: não revela se o erro foi no usuário, na senha ou em conta desativada. -->
+    <p th:if="${param.error}" role="alert">Usuário ou senha inválidos.</p>
+    <p th:if="${param.logout}" role="status">Você saiu do sistema.</p>
+
+    <!-- th:action faz o Thymeleaf incluir automaticamente o token CSRF no formulário. -->
+    <form th:action="@{/login}" method="post">
+        <div>
+            <label for="username">Usuário</label>
+            <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+        </div>
+        <div>
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit">Entrar</button>
+    </form>
+</main>
+</body>
+</html>
