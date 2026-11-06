@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!--
+        Fragmento da Identidade Visual Oficial Vestis
+        - Símbolo: Naipe de paus (♣) estilizado em traçado outline minimalista.
+        - Tipografia: 'vestis' em minúsculas e negrito sans-serif discreto.
+        - Orientação: Vertical (símbolo acima, texto abaixo).
+        - Variante 'light': para fundos escuros (sidebar, cards marrons). Símbolo e texto brancos.
+        - Variante 'dark': para fundos claros (login, header institucional, footer). Símbolo e texto em #60342F.
+    -->
+
+    <!-- Logo completo (layout vertical: símbolo + 'vestis') -->
+    <div th:fragment="logo(variant)" th:with="v=${variant ?: 'dark'}" class="vestis-brand-vertical">
+        <svg th:if="${v == 'light'}" class="vestis-brand-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vestis">
+            <path d="M40 70 C46 69 47 58 46 52 A 13.5 13.5 0 1 1 42.5 33.5 A 13.5 13.5 0 1 1 57.5 33.5 A 13.5 13.5 0 1 1 54 52 C53 58 54 69 60 70 Q50 67 40 70 Z" 
+                  stroke="#FFFFFF" 
+                  stroke-width="2.75" 
+                  stroke-linejoin="round" 
+                  stroke-linecap="round" 
+                  fill="none"/>
+            <text x="50" y="90" fill="#FFFFFF" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="18.5" letter-spacing="3.5" text-anchor="middle">vestis</text>
+        </svg>
+
+        <svg th:if="${v == 'dark'}" class="vestis-brand-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vestis">
+            <path d="M40 70 C46 69 47 58 46 52 A 13.5 13.5 0 1 1 42.5 33.5 A 13.5 13.5 0 1 1 57.5 33.5 A 13.5 13.5 0 1 1 54 52 C53 58 54 69 60 70 Q50 67 40 70 Z" 
+                  stroke="#60342F" 
+                  stroke-width="2.75" 
+                  stroke-linejoin="round" 
+                  stroke-linecap="round" 
+                  fill="none"/>
+            <text x="50" y="90" fill="#60342F" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="18.5" letter-spacing="3.5" text-anchor="middle">vestis</text>
+        </svg>
+    </div>
+
+    <!-- Símbolo isolado (apenas o trefoil outline, para ícones compactos ou avatares) -->
+    <div th:fragment="symbol(variant)" th:with="v=${variant ?: 'dark'}" class="vestis-symbol-wrap">
+        <svg th:if="${v == 'light'}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Símbolo Vestis">
+            <path d="M30 68 C36 67 37 56 36 50 A 13.5 13.5 0 1 1 32.5 31.5 A 13.5 13.5 0 1 1 47.5 31.5 A 13.5 13.5 0 1 1 44 50 C43 56 44 67 50 68 Q40 65 30 68 Z" 
+                  stroke="#FFFFFF" 
+                  stroke-width="2.75" 
+                  stroke-linejoin="round" 
+                  stroke-linecap="round" 
+                  fill="none"/>
+        </svg>
+
+        <svg th:if="${v == 'dark'}" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Símbolo Vestis">
+            <path d="M30 68 C36 67 37 56 36 50 A 13.5 13.5 0 1 1 32.5 31.5 A 13.5 13.5 0 1 1 47.5 31.5 A 13.5 13.5 0 1 1 44 50 C43 56 44 67 50 68 Q40 65 30 68 Z" 
+                  stroke="#60342F" 
+                  stroke-width="2.75" 
+                  stroke-linejoin="round" 
+                  stroke-linecap="round" 
+                  fill="none"/>
+        </svg>
+    </div>
+
+</body>
+</html>

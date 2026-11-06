@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!--
+        Rodapé Institucional Compartilhado (Referência Oficial - Tela 01)
+        - Esquerda: Logotipo Vestis
+        - Centro: Como funciona, Contato, Acesso da loja
+        - Direita: Vestis · Gestão com lojas de locação
+    -->
+    <footer th:fragment="footer" class="public-footer">
+        <div class="public-footer-inner">
+            <!-- Esquerda: Logo Oficial -->
+            <div class="public-footer-brand">
+                <a th:href="@{/}" title="Vestis">
+                    <div th:replace="~{fragments/brand :: logo('dark')}"></div>
+                </a>
+            </div>
+
+            <!-- Centro: Links institucionais -->
+            <div class="public-footer-links">
+                <a href="#comofunciona">Como funciona</a>
+                <a href="#contato">Contato</a>
+                <a th:href="@{/login}">Acesso da loja</a>
+            </div>
+
+            <!-- Direita: Tagline -->
+            <div class="public-footer-copy">
+                <span>Vestis &middot; Gestão com lojas de locação</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

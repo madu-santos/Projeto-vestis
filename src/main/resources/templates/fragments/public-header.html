@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!--
+        Cabeçalho Público Institucional Compartilhado (Referência Oficial - Tela 01)
+        - Logo Oficial Vestis à esquerda
+        - Menu central: Início, Funcionalidades, Como funciona, Sobre
+        - Ações à direita: Entrar e Solicitar demonstração →
+    -->
+    <header th:fragment="header" class="public-header">
+        <div class="public-nav-container">
+            <!-- Logo oficial -->
+            <a th:href="@{/}" class="public-brand-link" title="Vestis — Início">
+                <div th:replace="~{fragments/brand :: logo('dark')}"></div>
+            </a>
+
+            <!-- Links de Navegação -->
+            <ul class="public-nav-links">
+                <li><a th:href="@{/}">Início</a></li>
+                <li><a href="#funcionalidades">Funcionalidades</a></li>
+                <li><a href="#comofunciona">Como funciona</a></li>
+                <li><a href="#sobre">Sobre</a></li>
+            </ul>
+
+            <!-- Ações -->
+            <div class="public-nav-actions">
+                <a th:href="@{/login}" class="btn-vestis-ghost" style="font-weight: 500;">Entrar</a>
+                <a href="#demonstracao" class="btn-vestis-primary btn-vestis-sm">
+                    <span>Solicitar demonstração</span>
+                    <span style="font-size: 14px;">&rarr;</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+</body>
+</html>

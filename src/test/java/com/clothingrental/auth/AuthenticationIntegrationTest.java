@@ -121,9 +121,16 @@ class AuthenticationIntegrationTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
+    @Test
+    void institutionalHomePageIsPubliclyAccessible() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("institutional/home"))
+                .andExpect(content().string(containsString("vestis")));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
-            "/",
             "/lojas/loja-teste",
             "/lojas/aurora",
             "/lojas/festa-e-cia/vestidos",

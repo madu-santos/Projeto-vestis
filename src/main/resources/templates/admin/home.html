@@ -3,17 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Painel administrativo</title>
+    <title>Dashboard Administrativo — Vestis</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/design-system.css}">
+    <link rel="stylesheet" th:href="@{/css/components.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
-<body>
-<main>
-    <h1>Painel administrativo</h1>
-    <p>Acesso administrativo realizado com sucesso.</p>
+<body class="admin-layout">
 
-    <!-- Logout por POST, com token CSRF incluído pelo th:action. -->
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Sair</button>
-    </form>
-</main>
+    <!-- Barra Lateral Fixa Compartilhada (220px) -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar('home')}"></div>
+
+    <!-- Cabeçalho Fixo Compartilhado (72px) -->
+    <div th:replace="~{fragments/admin-header :: header(${storeName}, ${storeSlug}, ${username})}"></div>
+
+    <!-- Conteúdo Principal do Painel -->
+    <main class="admin-main">
+        <div class="admin-container">
+
+            <!-- 1. Topo: Boas-vindas com dados reais do principal e ação principal -->
+            <div class="admin-welcome-bar">
+                <div>
+                    <h1 class="page-title">Olá, <span th:text="${username ?: 'Administrador'}">Administrador</span>!</h1>
+                    <p class="page-subtitle">
+                        Acesso administrativo realizado com sucesso. Aqui está o resumo operacional do seu estabelecimento.
+                    </p>
+                </div>
+                <div>
+                    <button type="button" class="btn-vestis-primary" title="Módulo de catálogo em preparação" style="opacity: 0.9;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Cadastrar peça</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Grid de 4 Stat Cards Principais (Valores reais: 0 sem módulos de negócio) -->
+            <div class="admin-stats-grid">
+                <!-- Card 1: Peças Cadastradas -->
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background-color: #F4E8E6; color: #B46B64;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value">0</span>
+                        <span class="stat-card-label">Peças cadastradas</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Solicitações Pendentes -->
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background-color: #F7ECEE; color: #A1646C;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value">0</span>
+                        <span class="stat-card-label">Solicitações pendentes</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Locações Ativas -->
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background-color: #E8F4EC; color: #2E6B4F;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value">0</span>
+                        <span class="stat-card-label">Locações ativas</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Clientes Cadastrados -->
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="background-color: #EFE9E4; color: #60342F;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value">0</span>
+                        <span class="stat-card-label">Clientes cadastrados</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Duas Colunas: Estados Vazios Explicativos Sem Dados Fictícios -->
+            <div class="admin-content-grid">
+                <!-- Coluna 1: Atividade Recente (Estado Vazio Elegante) -->
+                <div class="vestis-card">
+                    <div class="vestis-card-header">
+                        <h2 class="vestis-card-title">Atividade recente</h2>
+                        <span class="vestis-badge badge-neutral">Atualizado em tempo real</span>
+                    </div>
+                    <div class="vestis-empty-state">
+                        <div class="vestis-empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="vestis-empty-title">Nenhuma atividade registrada</h3>
+                        <p class="vestis-empty-desc">
+                            As solicitações de clientes, confirmações de locação e cadastros da loja aparecerão aqui assim que as movimentações forem iniciadas.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Coluna 2: Próximas Reservas (Estado Vazio Estruturado) -->
+                <div class="vestis-card">
+                    <div class="vestis-card-header">
+                        <h2 class="vestis-card-title">Próximas reservas</h2>
+                        <span class="vestis-badge badge-neutral">Cronograma semanal</span>
+                    </div>
+                    <div class="vestis-empty-state">
+                        <div class="vestis-empty-icon" style="background-color: #EBF2F8; color: #3C6186;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <h3 class="vestis-empty-title">Nenhuma reserva agendada</h3>
+                        <p class="vestis-empty-desc">
+                            A estrutura de reservas e provas de peças será exibida neste espaço quando os agendamentos forem confirmados na etapa de locações.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Banner Inferior: "Sua loja, mais organizada." -->
+            <div class="admin-promo-banner">
+                <div>
+                    <h3 class="vestis-heading">Sua loja, mais organizada.</h3>
+                    <p>Gerencie seu acervo e acompanhe as locações em um só lugar.</p>
+                </div>
+                <div>
+                    <button type="button" class="btn-vestis-primary" title="Módulo de catálogo em preparação" style="opacity: 0.9;">
+                        <span>Ver catálogo</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>

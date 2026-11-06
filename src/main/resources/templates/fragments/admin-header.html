@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!--
+        Cabeçalho Superior Administrativo Compartilhado (Auditado - Prompt 11)
+        - Altura fixa: 72px
+        - Superfície: #FFFCF8 com borda inferior #E6D6CE
+        - Esquerda: Nome real do estabelecimento e status da loja (sem seletor de troca)
+        - Direita: Notificações, avatar circular com inicial dinâmica e identificação real do funcionário
+    -->
+    <header th:fragment="header(storeName, storeSlug, username)" class="admin-header">
+        <!-- Esquerda: Identificação da Loja Atual (Tenant Único do Funcionário) -->
+        <div class="admin-header-left">
+            <div class="d-flex align-items-center gap-2">
+                <span class="admin-store-name" th:text="${storeName ?: 'Loja'}">Nome da Loja</span>
+                <span class="vestis-badge badge-success">Loja Ativa</span>
+            </div>
+        </div>
+
+        <!-- Direita: Notificações + Perfil do Usuário Autenticado -->
+        <div class="admin-header-right">
+            <!-- Indicador de Vitrine da Loja (Em preparação) -->
+            <span class="vestis-badge badge-neutral" title="A vitrine pública da loja será disponibilizada na próxima etapa">
+                Vitrine em breve
+            </span>
+
+            <!-- Ícone de Notificações -->
+            <div class="admin-notif-btn" title="Notificações e avisos da loja">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </div>
+
+            <!-- Perfil do Usuário Autenticado Dinâmico -->
+            <div class="admin-user-profile" title="Conta administrativa conectada">
+                <div class="vestis-avatar" 
+                     th:text="${#strings.substring(username ?: (#authentication != null ? #authentication.name : 'A'), 0, 1).toUpperCase()}">
+                    A
+                </div>
+                <span class="admin-user-name" 
+                      th:text="${username ?: (#authentication != null ? #authentication.name : 'Administrador')}">
+                    Administrador
+                </span>
+            </div>
+        </div>
+    </header>
+
+</body>
+</html>

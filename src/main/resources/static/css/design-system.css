@@ -1,0 +1,180 @@
+/* ==========================================================================
+   VESTIS DESIGN SYSTEM — FUNDAÇÃO VISUAL CONSOLIDADA (PROMPT 11)
+   ========================================================================== */
+
+/* 1. Importação de Tipografia Oficial (Google Fonts com Fallbacks Locais) */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* 2. Tokens de Design (Variáveis CSS Oficiais Centralizadas) */
+:root {
+    /* Paleta Oficial Aprovada */
+    --color-background: #F7F4F0;       /* Off-white predominante para fundos */
+    --color-surface: #FFFCF8;          /* Superfície de cartões, formulários e painéis */
+    --color-surface-hover: #F8F3ED;    /* Hover sutil sobre superfícies claras */
+
+    --color-primary: #B46B64;          /* Terracota para botões e ações principais */
+    --color-primary-hover: #9E5852;    /* Terracota escurecido para interações */
+    --color-primary-light: #F4E8E6;    /* Fundo suave para destaques e ícones */
+    --color-primary-focus: rgba(180, 107, 100, 0.25);
+
+    --color-secondary: #A1646C;        /* Rosé amarronzado para uso pontual */
+    --color-secondary-light: #F7ECEE;  /* Fundo suave da cor secundária */
+    --color-rose: var(--color-secondary);
+
+    --color-sidebar: #60342F;          /* Marrom estrutural para menu lateral */
+    --color-sidebar-active: #874941;   /* Terracota fechado para item ativo/hover na sidebar */
+    --color-sidebar-hover: #723e38;    /* Variação sutil na sidebar */
+    --color-sidebar-text: #F3EAE6;     /* Texto claro na sidebar */
+    --color-sidebar-text-muted: #D1BCB5; /* Texto secundário na sidebar */
+
+    --color-text: #39231F;             /* Texto principal (marrom escuro / café) */
+    --color-text-muted: #7A6662;       /* Texto secundário e legendas */
+    --color-text-light: #9B8985;       /* Texto auxiliar e placeholders */
+
+    --color-border: #E6D6CE;           /* Borda sutil de cartões e divisões */
+    --color-border-subtle: #F0E5DF;    /* Separador ultra discreto */
+    --color-border-focus: #B46B64;     /* Borda com foco ativo */
+
+    /* Badges e Estados Semânticos */
+    --color-success: #2E6B4F;
+    --bg-success: #E8F4EC;
+    --border-success: #C7E3D2;
+
+    --color-warning: #9B6814;
+    --bg-warning: #FEF6E7;
+    --border-warning: #F5E0B6;
+
+    --color-info: #3C6186;
+    --bg-info: #EBF2F8;
+    --border-info: #C9DBEC;
+
+    --color-neutral: #6E5C58;
+    --bg-neutral: #EFE9E4;
+    --border-neutral: #DCD0C8;
+
+    --color-danger: #A53636;
+    --bg-danger: #FBEAEA;
+    --border-danger: #F0B8B8;
+
+    /* Tipografia e Hierarquia Visual */
+    --font-serif: 'DM Serif Display', Georgia, serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+
+    /* Tamanhos Tipográficos Padronizados (Tabela Oficial) */
+    --font-size-page-title: 36px;      /* Título principal: 36px */
+    --font-size-section-title: 20px;   /* Título de seção: 20px */
+    --font-size-subtitle: 16px;        /* Subtítulo: 16px */
+    --font-size-body: 14px;            /* Texto comum: 14px */
+    --font-size-aux: 12px;             /* Texto auxiliar: 12px */
+
+    /* Dimensões Oficiais Compartilhadas */
+    --admin-sidebar-width: 220px;      /* Sidebar: 220px */
+    --admin-header-height: 72px;       /* Cabeçalho administrativo: 72px */
+    --admin-content-padding: 32px;     /* Padding do conteúdo: 32px */
+    --admin-section-gap: 24px;         /* Espaçamento entre seções: 24px */
+    --control-height: 44px;            /* Inputs e botões principais: 44px */
+    --card-radius: 14px;               /* Raio dos cartões: 14px */
+    --card-padding: 20px;              /* Padding dos cartões: 20px */
+    --field-gap: 16px;                 /* Espaçamento entre campos: 16px */
+    --icon-size: 20px;                 /* Ícones principais: 20px */
+    --radius-pill: 9999px;
+
+    /* Sombras Sutis */
+    --shadow-xs: 0 1px 3px rgba(57, 35, 31, 0.04);
+    --shadow-sm: 0 2px 6px rgba(57, 35, 31, 0.05);
+    --shadow-md: 0 4px 16px rgba(57, 35, 31, 0.07);
+    --shadow-lg: 0 12px 32px rgba(57, 35, 31, 0.09);
+
+    /* Transições */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+}
+
+/* 3. Reset e Estilos Globais */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+}
+
+/* Hierarquia de Títulos */
+h1, h2, h3, h4, h5, h6,
+.vestis-heading {
+    font-family: var(--font-serif);
+    color: var(--color-text);
+    font-weight: 400;
+    line-height: 1.25;
+    margin-top: 0;
+}
+
+.page-title {
+    font-size: var(--font-size-page-title); /* 36px */
+    margin-bottom: 0.35rem;
+}
+
+.section-title {
+    font-size: var(--font-size-section-title); /* 20px */
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: var(--font-size-subtitle); /* 16px */
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+/* Fotografias com Proporção 4:5 e object-fit: contain */
+.garment-photo-wrap {
+    aspect-ratio: 4 / 5;
+    background-color: var(--color-background);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.garment-photo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Logo Oficial (Componente de Layout Vertical) */
+.vestis-brand-vertical {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.vestis-brand-vertical .vestis-brand-svg {
+    display: block;
+    width: 76px;
+    height: 76px;
+    max-width: 100%;
+}
+
+.vestis-symbol-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
